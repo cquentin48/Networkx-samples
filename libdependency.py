@@ -2,14 +2,13 @@ import argparse
 import requests
 import networkx as nx
 import matplotlib.pyplot as plt
-"""
-pos = None
-annot = None
-ax = None
-nodes = None
-"""
 
 def display_graph(graph: nx.Graph):
+    """Display a graph
+
+    Args:
+        graph (nx.Graph): graph to be displayed
+    """
     global pos
     global annot
     global ax
@@ -32,15 +31,19 @@ def display_graph(graph: nx.Graph):
     plt.show()
 
 def update_annot(ind):
+    """Update annotation
+    """
     node = ind["ind"][0]
     xy = pos[node]
     annot.xy = xy
     node_attr = {'node' : node}
-    node_attr.update(graph.nodes[node])
+    node_attr.update(dependency_graph.nodes[node])
     text = '\n'.join(f'{k} : {v}' for k, v in node_attr.items())
     annot.set_text(text)
 
 def hover(event):
+    """Hover function
+    """
     vis = annot.get_visible()
     if event.inaxes == ax:
         cont, ind = nodes.contains(event)
@@ -64,7 +67,7 @@ def fetch_raw_data(package: str) ->[str]:
     """
     url = 'https://pypi.org/pypi/{}/json'
 
-    json = requests.get(url.format(package)).json()
+    json = requests.get(url.format(package),timeout=10).json()
     return json
 
 def return_lib_attributes(name, version):
@@ -159,6 +162,8 @@ def build_graph(lib_name:str, dependencies_count:int) -> nx.DiGraph:
     return graph
 
 def parse_args():
+    """Parse Arguments
+    """
     parser = argparse.ArgumentParser(
         prog='Python dependency graph visualiser',
         description='Display in a graph the dependencies of a pypi'+\
@@ -182,6 +187,5 @@ def parse_args():
     return(args.library, args.number)
 
 (library_name, dep_numbers) = parse_args()
-graph = build_graph(library_name, dep_numbers)
-print(graph)
-display_graph(graph)
+dependency_graph = build_graph(library_name, dep_numbers)
+display_graph(dependency_graph)
